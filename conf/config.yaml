@@ -1,0 +1,5 @@
+port: "8080"
+storage: "./data"
+jwt_secret: "supersecretkey"
+users:
+  admin: "password123"

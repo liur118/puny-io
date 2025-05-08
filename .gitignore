@@ -1,0 +1,7 @@
+.idea
+build
+*.iml
+data
+.vscode
+__debug_bin*
+node_modules
