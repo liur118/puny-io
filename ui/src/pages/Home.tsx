@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Layout, Menu, Button, Table, Upload, Modal, Input, message } from 'antd';
+import { Layout, Menu, Button, Table, Upload, Modal, Input, message, notification } from 'antd';
 import {
   FolderOutlined,
   UploadOutlined,
@@ -7,6 +7,7 @@ import {
   DownloadOutlined,
   PlusOutlined,
   LinkOutlined,
+  CheckCircleOutlined,
 } from '@ant-design/icons';
 import { listBuckets, listObjects, createBucket, uploadObject, downloadObject, deleteObject, getObjectURL } from '../services/api';
 import { AxiosError } from 'axios';
@@ -111,7 +112,27 @@ export default function Home() {
       // 尝试使用 Clipboard API
       try {
         await navigator.clipboard.writeText(data.url);
-        message.success('访问链接已复制到剪贴板');
+        notification.success({
+          message: '链接已复制',
+          description: (
+            <div>
+              <p>访问链接已成功复制到剪贴板：</p>
+              <code style={{ 
+                display: 'block', 
+                padding: '8px', 
+                background: '#f5f5f5', 
+                borderRadius: '4px',
+                wordBreak: 'break-all',
+                fontSize: '12px'
+              }}>
+                {data.url}
+              </code>
+            </div>
+          ),
+          icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+          duration: 4,
+          placement: 'topRight',
+        });
       } catch {
         // 如果 Clipboard API 失败，使用传统方法
         const textArea = document.createElement('textarea');
@@ -120,9 +141,45 @@ export default function Home() {
         textArea.select();
         try {
           document.execCommand('copy');
-          message.success('访问链接已复制到剪贴板');
+          notification.success({
+            message: '链接已复制',
+            description: (
+              <div>
+                <p>访问链接已成功复制到剪贴板：</p>
+                <code style={{ 
+                  display: 'block', 
+                  padding: '8px', 
+                  background: '#f5f5f5', 
+                  borderRadius: '4px',
+                  wordBreak: 'break-all',
+                  fontSize: '12px'
+                }}>
+                  {data.url}
+                </code>
+              </div>
+            ),
+            icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+            duration: 4,
+            placement: 'topRight',
+          });
         } catch {
-          message.info('访问链接：' + data.url);
+          // 所有复制方法都失败，显示链接供手动复制
+          Modal.info({
+            title: '请手动复制链接',
+            content: (
+              <div>
+                <p>自动复制失败，请手动复制以下链接：</p>
+                <Input.TextArea
+                  value={data.url}
+                  readOnly
+                  autoSize={{ minRows: 2, maxRows: 4 }}
+                  style={{ marginTop: '8px' }}
+                  onFocus={(e) => e.target.select()}
+                />
+              </div>
+            ),
+            okText: '知道了',
+          });
         }
         document.body.removeChild(textArea);
       }
